@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/md5.h>
+//#include <openssl/md5.h>
 //#include "external/crc32c/crc32c.c"
 #include "crc32c.h"
 #include "winnowing.h"

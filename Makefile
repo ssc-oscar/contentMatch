@@ -4,8 +4,7 @@ WIN64CC=x86_64-w64-mingw32-gcc
 CCFLAGS+= -fPIC -g -Wall -Werror -std=gnu99 -I./inc -I./external/inc
 
 # Linker flags
-LDFLAGS+=-lpthread -lcrypto -lssl -lm
-LDFLAGS_WIN64+=-L/home/osboxes/scanoss/curl-7.76.1/lib -L/usr/local/lib/ -lpthread -lcrypto -lssl -lcurl -lm
+LDFLAGS+=-lpthread -lm
 
 LIBFLAGS=-O -g -Wall -std=gnu99 -fPIC -c
 
