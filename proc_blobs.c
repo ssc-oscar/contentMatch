@@ -53,12 +53,20 @@ int proc_blob (char *path, int fr, int to){
   FILE * fb = fopen(pi, "rb");
   for (int i = 0; i < fr; i++){
     line = NULL;
-    getline (&line, &len, fi);
+    int res = getline (&line, &len, fi);
+	if (res == -1){
+      fprintf (stderr, "could not read line %d\n", i);
+	  return (-1);
+	}
     free(line);
   }
   for (int i = fr; i <= to; i++){
     line = NULL;
-    getline (&line, &len, fi);
+	int res = getline (&line, &len, fi);
+	if (res == -1){
+      fprintf (stderr, "could not read line %d\n", i);
+	  return (-1);
+	}
     char * cp = strdup (line);
     char * nn = strtok (cp, ";");
     if (atoi (nn) != i) return 0;
