@@ -26,11 +26,11 @@ int get_fingerprints (char *src, long length){
     for (int i = 0; i < size; i++){
       if (last_line != lines[i]){
 	if (last_line != 0) printf(";");
-	//fprintf (stderr, "%ld, %u, %u %u %u\n", length, size, lines[0], lines[1], last_line);
-	printf("%d=%08x", lines[i], hashes[i]);
-	last_line = lines[i];
-      }else
-	printf(",%08x", hashes[i]);
+	  // fprintf (stderr, "%ld, %u, %u %u %u\n", length, size, lines[0], lines[1], last_line);
+      printf("%d=%08x", lines[i], hashes[i]);
+      last_line = lines[i];
+    }else
+	  printf(",%08x", hashes[i]);
     }
     printf(";");
     free(hashes);
@@ -56,7 +56,7 @@ int proc_blob (char *path, int fr, int to){
     getline (&line, &len, fi);
     free(line);
   }
-  for (int i = fr; i < to; i++){
+  for (int i = fr; i <= to; i++){
     line = NULL;
     getline (&line, &len, fi);
     char * cp = strdup (line);
@@ -71,7 +71,11 @@ int proc_blob (char *path, int fr, int to){
     unsigned len = atoi(sz);
     if (len < MAX_FILE_SIZE){
       char * buff = malloc (len);
-      char * buffO = malloc (len*10);
+      char * buffO = malloc (len*100);
+      if (buffO == NULL){
+        fprintf (stderr, "buffO==NULL len=%u\n", len);
+		exit (-1);
+      }
       int err = fread (buff, atoi(sz), 1, fb);
       //unsigned short * ll = (unsigned short *) (buff +1);
       //printf ("%d %u %x\n", err, len, *ll);
@@ -79,10 +83,10 @@ int proc_blob (char *path, int fr, int to){
       if (err > 0){
         printf ("%s;%d;%s;%s;%s;%s;%d;", nn, atoi (nn), off, sz, sha1, nm, err);
         buffO[err] = 0;
-	if (! get_fingerprints (buffO, err)){	  
+        if (! get_fingerprints (buffO, err)){	  
           printf ("\n");
-	}else printf ("\n"); // this should not happen unless file too short
-	//printf ("err=%d, outLen=%lu, firstword=%x\n", err, strnlen(buffO, len*10-1), *ll);
+        }else printf ("\n"); // this should not happen unless file too short
+        //printf ("err=%d, outLen=%lu, firstword=%x\n", err, strnlen(buffO, len*10-1), *ll);
       }
       free (buffO);
       free (buff);
