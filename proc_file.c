@@ -17,7 +17,7 @@ int proc_file (char *path){
   long len = ftell (f);
   char *cnt = malloc (len + 1);
   fseek(f, 0, SEEK_SET);
-  int err = fread (cnt, len, 1, f);
+  int err = fread (cnt, 1, len, f);
   if (err != len){
     fprintf (stderr, "could not read %ld bytes, got %d\n", len, err);
 	 if (cnt != NULL) free (cnt);
@@ -40,7 +40,7 @@ int find_hash (char *path, char *hash){
   long len = ftell (f);
   char *cnt = malloc (len + 1);
   fseek(f, 0, SEEK_SET);
-  int err = fread (cnt, len, 1, f);
+  int err = fread (cnt, 1, len, f);
   if (err != len){
     fprintf (stderr, "could not read %ld bytes, got %d\n", len, err);
 	 if (cnt != NULL) free (cnt);
