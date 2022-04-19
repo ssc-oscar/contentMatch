@@ -35,7 +35,7 @@ int find_hash (char *path, char *hash){
   long len = ftell (f);
   char *cnt = malloc (len + 1);
   fseek(f, 0, SEEK_SET);
-  fread (cnt, len, 1, f);
+  int err = fread (cnt, len, 1, f);
   fclose (f);
   uint32_t off = 0;
   while (off < len){
