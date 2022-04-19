@@ -202,9 +202,9 @@ int proc_one_blob (char *path, unsigned long offf, int sz){
   // printf (";in1=%lu;",off);
   unsigned len = sz;
   char * buff = malloc (len);
-  int err = fread (buff, sz, 1, fb);
-  unsigned char mask = *buff;
   char * buffO;
+  int err = fread (buff, 6, 1, fb);
+  unsigned char mask = *buff;
   int len1 = mask & 127;
   int off = 1;
   if (mask&0x80){
@@ -215,52 +215,47 @@ int proc_one_blob (char *path, unsigned long offf, int sz){
     off = k;
   }
   if (off > 1){
-    int msk = 0b11111;
+    unsigned char msk = 0b11111;
     msk = msk >> (off-2);
     len1 = mask & msk;
-    //printf ("k=%d len1=%d mask=%x\n", 0, len1, mask);
     for (int k = 1; k < off; k++){
       mask = *(buff+k);
       len1 = len1*64 + (mask&0x3f);
-      //printf ("k=%d len1=%d inc=%d\n", k, len1, (mask&0x3f));
     }
   }
-  mask = *buff;
-  if (!mask){
-    buffO = buff+1;
-    len1 = strlen(buff+1);
-    err = len1;
-  }else{
-    // printf ("c=%x off=%d len1=%d buf=%s\n", mask, off, len1, buff+1);
-    buffO = malloc (len1+10);
-    if (buffO == NULL){
-      fprintf (stderr, "buffO==NULL len=%u\n", len1);
-      exit (-1);
+  // read in the rest of the buffer
+  // printf ("c=%x off=%d len1=%d fr=%ld to=%ld\n", mask, off, len1, fr, to);
+  //if (off != 3 && len1 > 80 && len1 < MAX_FILE_SIZE){// got off 3 already, re-add for future
+  if (len1 > 80 && len1 < MAX_FILE_SIZE){
+    err = fread (buff+6, len-6, 1, fb);
+    mask = *buff;
+    if (!mask){
+      buffO = buff+1;
+      len1 = strlen(buff+1);
+      err = len1;
+    }else{
+      buffO = malloc (len1+10);
+      if (buffO == NULL){
+        fprintf (stderr, "buffO==NULL len=%u\n", len1+10);
+        exit (-1);
+      }
     }
-    err = lzf_decompress (buff+off, len-off, buffO, len1);
+    err = lzf_decompress (buff+off, len-off, buffO, len1+1);
+    if (err > 0 && len1 < MAX_FILE_SIZE){
+      //printf ("%s;%s;%s;%s;%d", offf, sz, sha1, nm, err);
+      buffO[err] = 0;
+      if (! get_fingerprints (buffO, err)){	  
+        printf ("\n");
+      }else
+        printf ("\n"); // this should not happen unless file too short
+        //printf ("err=%d, outLen=%lu, firstword=%x\n", err, strnlen(buffO, len*10-1), *ll);
+    }else
+      fprintf (stderr, "\ncould not decompress %s %lu %d %d %d\n", path, offf, sz, err, len1);
+    if (buff+1 != buffO) free (buffO);
   }
-  if (err > 0){
-    if (err != len1){
-      printf ("len1=%d err=%d off=%d offf=%lu",len1, err, off, offf);
-      exit(-1);
-    }
-    for (int k = 0; k < off; k++)
-      printf ("%.2x",*(buff+k)&0xff);
-    printf (";%lu;%d;%d;%d;%d\n", offf, sz, err, len, off);
-    //printf ("%lu;%d;%d;", off, sz, err);
-    buffO[err] = 0;
-    // if (! get_fingerprints (buffO, err)){	  
-    //  printf ("\n");
-    //}else 
-    //  printf ("\n"); 
-  }else{
-    fprintf (stderr, "\ncould not decompress %s %lu %d %d\n", path, offf, sz, err);
-  }
-  if (buff+1 != buffO) free (buffO);
   free (buff);
   return 0;
 }
-
 
 
 
