@@ -17,7 +17,12 @@ int proc_file (char *path){
   long len = ftell (f);
   char *cnt = malloc (len + 1);
   fseek(f, 0, SEEK_SET);
-  fread (cnt, len, 1, f);
+  int err = fread (cnt, len, 1, f);
+  if (err != len){
+    fprintf (stderr, "could not read %ld bytes, got %d\n", len, err);
+	 if (cnt != NULL) free (cnt);
+	 exit (-1);
+}
   fclose (f);
   if (! get_fingerprints (cnt, len)){	  
     printf ("\n");
@@ -36,6 +41,11 @@ int find_hash (char *path, char *hash){
   char *cnt = malloc (len + 1);
   fseek(f, 0, SEEK_SET);
   int err = fread (cnt, len, 1, f);
+  if (err != len){
+    fprintf (stderr, "could not read %ld bytes, got %d\n", len, err);
+	 if (cnt != NULL) free (cnt);
+	 exit (-1);
+  }
   fclose (f);
   uint32_t off = 0;
   while (off < len){
