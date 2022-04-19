@@ -16,8 +16,7 @@ unsigned int lzf_decompress (const void *const in_data,  unsigned int in_len,
 
 
 int get_fingerprints (char *src, long length){
-  if (strlen(src) < length) length = strlen(src);
-  if (length < MAX_FILE_SIZE){
+  if (strlen(src) == length && length < MAX_FILE_SIZE){
     uint32_t *hashes = malloc(MAX_FILE_SIZE);
     uint32_t *lines = malloc(MAX_FILE_SIZE);
     uint32_t last_line = -1;
@@ -95,25 +94,36 @@ int proc_blob (char *path, long fr, long to){
   FILE * fi = stdin;//fopen(pi, "rb");
   sprintf(pi, "%s.bin", path);
   FILE * fb = fopen(pi, "rb");
-  for (int i = 0; i < fr; i++){
+  if (fr > 0){
+    for (int i = 0; i < fr; i++){
+      line = NULL;
+      int res = getline (&line, &len, fi);
+      if (res == -1){
+        fprintf (stderr, "could not read line %d\n", i);
+	return (-1);
+      }
+      free(line);
+    }
+  }
+  long diff = -1;
+  if (to > 0){
+    if (fr > 0) diff = to-fr + 1;
+    else diff = to;
+  }else{
+    diff = -1;
+  }
+  long i = 0;
+  while ((i < diff || diff < 0) && !feof (fi)){  
+    i++;
     line = NULL;
     int res = getline (&line, &len, fi);
-	  if (res == -1){
-      fprintf (stderr, "could not read line %d\n", i);
-	    return (-1);
-	  }
-    free(line);
-  }
-  for (int i = fr; i <= to; i++){
-    line = NULL;
-	  int res = getline (&line, &len, fi);
     if (res == -1){
-      fprintf (stderr, "could not read line %d\n", i);
+      fprintf (stderr, "could not read line %ld\n", i);
       return (-1);
     }
     char * cp = strdup (line);
     char * nn = strtok (cp, ";");
-    if (atoi (nn) != i) return 0;
+    // if (atoi (nn) != i) return 0;
     char * offf = strtok (NULL, ";");
     char * sz = strtok (NULL, ";");
     char * sha1 = strtok (NULL, ";");

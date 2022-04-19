@@ -342,18 +342,18 @@ uint32_t crc32c(uint32_t crc, const void *buf, size_t len)
 #define CHUNK SIZE
 
 uint32_t calc_crc32c (char *data, ssize_t len) {
-
-    uint32_t crc = 0;
-    size_t off, n;
+  uint32_t crc = 0;
+  size_t off, n;
 	off = 0;
-
 	do {
 		n = (size_t)len - off;
 		if (n > CHUNK) n = CHUNK;
 		crc = crc32c(crc, data + off, n);
+    //printf ("-%x;%p;%ld\n", crc, data, off);
 		off += n;
 	} while (off < (size_t)len);
 
+  // printf ("%x;%p;%ld\n", crc, data, len);
 	return crc;
 }
 
